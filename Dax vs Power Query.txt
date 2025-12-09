@@ -1,0 +1,33 @@
+Written 12/9/2025
+Norma Winters
+
+DAX vs Power Query
+
+DAX (Data Analysis Expressions)
+-------------------------------
+•	Purpose: Calculations & analytics on loaded data
+•	Use for: 
+	Calculated columns & measures
+	Aggregations (SUM, AVERAGE, COUNT)
+	Time intelligence (YTD, running totals)
+	Dynamic calculations with filters/slicers
+•	When: After data is in the model
+•	Example: Total Sales = SUM(Sales[Amount])
+
+Power Query (M Language)
+-----------------------------
+•	Purpose: Data transformation & preparation
+•	Use for: 
+	Cleaning & shaping data during import
+	Merging/joining tables
+	Removing duplicates, filtering rows
+	Changing data types, splitting columns
+•	When: Before data enters the model
+•	Example: Remove blanks, unpivot columns
+Key Difference
+•	Power Query: Transforms data once during refresh
+•	DAX: Calculates every time visuals update
+
+Best Practice
+----------------------------------
+Transform in Power Query → Calculate in DAX
