@@ -1,0 +1,155 @@
+Check list for powerBI
+12/10/2025 Written by Norma Winters
+
+-------------------------------
+
+Power BI DAX mistakes to avoid and how to fix them:
+---------------------------------------------------
+
+1.) Confusing calculated columns vs measures
+
+Mistake: Creating a calculated column when you need a measure (or vice versa)
+Fix: Use measures for aggregations that change based on filter context (like SUM, AVERAGE). Use calculated columns for row-by-row calculations that don't change. Measures are almost always more efficient for aggregations.
+
+2.)Not understanding filter context
+
+Mistake: Expecting a measure to automatically filter the way you think it should
+Fix: Use CALCULATE to explicitly modify filter context. For example, CALCULATE(SUM(Sales[Amount]), Product[Category]="Electronics") instead of assuming the filter applies automatically.
+
+3.) Using FILTER when you don't need to
+
+Mistake: CALCULATE(SUM(Sales[Amount]), FILTER(ALL(Product), Product[Category]="Electronics"))
+
+Fix: CALCULATE(SUM(Sales[Amount]), Product[Category]="Electronics") - DAX can optimize this much better. Only use FILTER for complex conditions that can't be expressed as simple filter arguments.
+
+4.) Forgetting about context transition
+
+Mistake: Using measures inside calculated columns without understanding they evaluate in row context
+
+Fix: Wrap iterators like SUMX properly, or use CALCULATE to convert row context to filter context when needed.
+
+5.) Not using variables
+
+Mistake: Repeating the same calculation multiple times, which hurts performance and readability
+
+Fix: Use VAR to store intermediate results:
+
+Sales Ratio = 
+VAR TotalSales = SUM(Sales[Amount])
+VAR AvgSales = AVERAGE(Sales[Amount])
+RETURN DIVIDE(TotalSales, AvgSales)
+Using RELATED incorrectly
+
+6.) Mistake: Trying to use RELATED in the wrong direction or when no relationship exists
+
+Fix: RELATED works from the many side to the one side. Use RELATEDTABLE to go from one to many.
+
+7.) Not handling division by zero
+
+Mistake: SUM(Sales[Profit]) / SUM(Sales[Revenue]) which errors when revenue is zero
+
+Fix: Use DIVIDE function: DIVIDE(SUM(Sales[Profit]), SUM(Sales[Revenue])) - it handles division by zero gracefully.
+
+8.) Overusing ALL()
+
+Mistake: Using ALL() everywhere to remove filters without understanding what you're removing
+
+Fix: Use REMOVEFILTERS for clarity, or use ALL, ALLEXCEPT, or ALLSELECTED depending on exactly which filters you want to preserve or remove.
+
+---------------------------------------------------------
+
+Power BI common Power Query mistakes and how to fix them:
+
+---------------------------------------------------------
+
+
+Power Query: Not using the right data types
+
+Mistake: Leaving columns as "Any" or "Text" when they should be numbers/dates
+
+Fix: Always explicitly set data types in the first few steps. Wrong types cause errors in calculations and prevent proper sorting. Use "Detect Data Type" cautiously—verify it got things right.
+
+Power Query: Doing transformations in DAX instead of Power Query
+
+Mistake: Creating calculated columns in DAX for simple transformations like extracting year from date or concatenating text
+
+Fix: Do data shaping in Power Query whenever possible—it's more efficient and happens at refresh time, not query time. Save DAX for measures and complex business logic.
+
+Power Query: Not naming steps clearly
+
+Mistake: Leaving default step names like "Changed Type1", "Changed Type2"
+
+Fix: Rename steps to describe what they do: "Removed Weekend Days", "Filtered Active Customers". This makes queries maintainable when you return to them later.
+
+Power Query: Using "Remove Duplicates" when you mean "Keep First/Last"
+
+Mistake: Removing duplicates without understanding which row you're keeping
+
+Fix: Use Table.Distinct carefully. Often you want to Group By with an aggregation (like Max date) to explicitly control which records you keep.
+
+Power Query: Loading unnecessary columns
+
+Mistake: Loading all columns from a source table when you only need a few
+
+Fix: Remove unused columns early in the query. This reduces memory usage and speeds up refresh times significantly.
+
+Power Query:  Hard-coding values instead of parameterizing
+
+Mistake: Filtering to specific dates or values directly in the query
+
+Fix: Use parameters for file paths, date ranges, or filter values that might change. Makes your solution more flexible and easier to maintain.
+
+Power Query:  Creating multiple queries that repeat the same steps
+
+Mistake: Copying a query and modifying it slightly, duplicating all the early steps
+
+Fix: Use reference or create a function. Load the base transformation once, then reference it. This is especially important for large datasets.
+
+Power Query:  Not understanding query folding
+
+Mistake: Adding steps that break query folding without realizing it, forcing Power BI to load entire tables into memory
+
+Fix: Check "View Native Query" to see if folding is working. Keep filtering, selecting columns, and simple transformations early. Avoid custom columns with complex logic or merging before filtering when working with databases.
+
+Power Query: Merging tables inefficiently
+
+Mistake: Merging large tables without filtering first, or using wrong join types
+
+Fix: Filter tables before merging. Use the right join type (Left, Inner, etc.). Consider if you really need a merge or if a relationship in the model would work better.
+
+Power Query:  Using "Change Type Using Locale" inconsistently
+
+Mistake: Not specifying locale when converting dates/numbers, causing errors with different regional settings
+
+Fix: Always use "Using Locale" for date and number conversions when your data might have regional formats: Table.TransformColumnTypes(#"Previous Step", {{"Date", type date}}, "en-US")
+
+Power Query: Not handling errors properly
+
+Mistake: Letting errors propagate through your query, causing the entire refresh to fail
+
+Fix: Use "Keep Errors" or "Remove Errors" steps, or replace errors with null/default values: Table.ReplaceErrorValues(#"Previous Step", {{"Column1", null}})
+
+Power Query: Appending tables with mismatched columns
+
+Mistake: Appending tables without ensuring column names and types match
+
+Fix: Standardize column names and types before appending. Use "Append Queries as New" to see the result before committing.
+
+Power Query: Creating circular dependencies
+
+Mistake: Query A references Query B, which references Query A
+
+Fix: Restructure your queries. Often you need a third "base" query that both reference, or you need to consolidate the logic.
+
+Power Query:  Not disabling load for intermediate queries
+
+Mistake: Loading staging/helper queries into the model that are only used as steps in other queries
+
+Fix: Right-click the query → Uncheck "Enable Load". This keeps your model cleaner and reduces memory usage.
+
+Power Query:  Using custom columns instead of Add Column from Examples
+
+Mistake: Writing complex M code for simple transformations
+
+Fix: Use "Column From Examples" for pattern-based transformations—it's faster and less error-prone for common tasks.
+
