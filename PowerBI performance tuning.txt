@@ -1,0 +1,149 @@
+
+Performance of Power BI DAX and Power Query:
+
+Written by Norma Winters 
+12/10/2025
+
+Benchmark before and after changes
+Document what changed: measures, aggregrtions, unused columns, etc.  
+
+Tools available: 
+   DAX Performance Analysis
+   DAX Studio (essential tool)
+
+**Performance Analyzer (built into Power BI Desktop)
+
+View → Performance Analyzer → Start Recording
+Interact with visuals to see which ones are slow
+Breaks down time by DAX query, visual display, and other operations
+Export results to analyze DAX queries in DAX Studio
+
+**Check measure calculation times
+
+Look for measures taking > 1 second in Performance Analyzer
+Identify if the issue is in formula engine (complex calculations) or storage engine (data retrieval)
+
+Watch for high cardinality relationships causing performance issues
+
+Monitor storage engine vs formula engine
+
+Storage engine queries should be fast (optimized by VertiPaq)
+
+Formula engine operations are row-by-row and slower
+Use SUMX, FILTER sparingly—these often force formula engine processing
+
+Check for materialization
+
+Look in query plans for materialization steps (temporary tables in memory)
+These indicate expensive operations that could potentially be optimized
+
+
+
+**********************************
+Power Query Performance Checks
+**********************************
+
+Tools Available: 
+
+Query Diagnostics (built into Power Query)
+
+Tools → Query Diagnostics → Start Diagnostics
+Refresh your queries
+Stop Diagnostics and review the diagnostic results
+Shows duration for each step and data source queries
+
+Check query folding
+
+Right-click a step → View Native Query
+If grayed out, folding has broken—steps after that run in Power BI's engine
+Keep folding active as long as possible for database sources 
+
+What is query folding?
+
+Query folding is Power Query's ability to translate M transformations into native SQL that executes on your database server rather than pulling all data into Power BI's memory. When folding works, you're essentially letting Power Query write optimized SQL for you—filtering, joining, and aggregating at the source. It breaks when you use M functions the database can't understand (like custom text operations), at which point Power BI loads data into memory to finish the transformations(slows performance).
+
+Monitor refresh times
+
+Check the refresh history in Power BI Service
+Use Power BI Desktop's refresh preview to time local refreshes
+Identify which queries are taking the longest
+
+Review step-by-step duration
+
+Add a custom step that records time: = Duration.From(DateTime.LocalNow() - #datetime(2024,1,1,0,0,0))
+Compare before and after each transformation to find slow steps
+
+Check data source queries
+
+In Query Diagnostics, look at "Data Source Query" duration
+Long data source queries might indicate missing indexes or inefficient source queries
+Consider pushing more logic to the source (if folding works)
+
+Monitor memory usage
+
+Task Manager during refresh to see memory spikes
+Large memory usage indicates tables loaded entirely into memory
+Often caused by broken query folding or loading too many columns
+
+Evaluate parallelism
+
+Power Query can run multiple queries in parallel
+Check if queries have dependencies that prevent parallel execution
+Reorganize to allow more parallel processing
+
+Model-Level Performance Checks
+Check model size
+
+Large .pbix files load slowly and consume more memory
+Use VertiPaq Analyzer in DAX Studio to see table and column sizes
+Remove unnecessary columns and tables
+
+Analyze relationships
+
+Many-to-many relationships are slower than one-to-many
+Bidirectional filters impact performance
+Check relationship cardinality is set correctly
+
+Review cardinality and data distribution
+
+High cardinality columns (many unique values) use more memory
+Use VertiPaq Analyzer to identify problematic columns
+Consider if you need all unique values or can group them
+
+Check aggregations
+
+For large datasets, consider using aggregation tables
+Power BI can automatically route queries to aggregated data
+
+Monitor incremental refresh
+
+For large tables, incremental refresh reduces refresh times
+Only refreshes recent data instead of entire table
+
+
+-----------------------------------
+General Best Practices for Testing
+-----------------------------------
+
+Test with realistic data volumes
+
+Performance issues often only appear with production-sized data
+Test with full dataset before deploying
+
+Use Query Plans in DAX Studio
+
+Physical and logical query plans show exactly how queries execute
+Identify scans, seeks, and expensive operations
+
+Benchmark before and after changes
+
+Record baseline performance metrics
+Make one change at a time and measure impact
+Keep a log of what improved/worsened performance
+
+Monitor in production
+
+Power BI Service has usage metrics and performance data
+Premium capacities have additional monitoring through capacity metrics app
+Set up alerts for slow-running reports
+
