@@ -1,0 +1,172 @@
+PowerBI security risks:
+
+Data Exposure Risks
+------------------
+
+***Oversharing reports and datasets
+
+Problem: Someone creates a sales report and accidentally shares it with the entire company instead of just the sales team. Now everyone can see confidential sales numbers.
+
+Fix: Be careful when clicking "Share" - double-check who you're sharing with. Use groups like "Sales Team" instead of "Everyone."
+
+***Row-Level Security (RLS) misconfiguration
+
+Problem: Imagine a report where salespeople should only see their own customers, but due to incorrect setup, they can see everyone's customers.
+
+Fix: When setting up reports, test them by logging in as different users to make sure each person only sees their own data. Have someone else verify it works correctly.
+
+***Embedded reports with inadequate token security
+
+Problem: You put a Power BI report on your website. The "key" that lets people view it doesn't expire, so if someone steals it, they can access the report forever.
+
+Fix: Make sure access keys expire after a short time (like a few hours) and require people to log in again regularly.
+
+Credential and Connection Risks
+--------------------------------
+
+***Stored credentials in gateways and data sources
+
+Problem: Power BI needs usernames and passwords to connect to your databases. 
+
+These passwords are stored in Power BI, and workspace administrators can potentially access them.
+
+Fix: Instead of storing passwords, use automatic authentication methods where the system verifies identity without needing passwords stored anywhere.
+
+Personal gateway security
+----------------------------
+
+Problem: Someone installs Power BI Gateway on their home laptop to connect to company data. If their laptop gets hacked or stolen, company data is at risk.
+
+Fix: Only allow IT-managed gateway installations on secure company servers, not on personal devices.
+
+Connection strings exposing sensitive info
+------------------------------------------
+
+Problem: Someone writes the database password directly in the Power BI file. Anyone who opens the file can see the password in plain text.
+Fix: Never type passwords directly into Power BI. Use secure methods to store passwords separately.
+
+Data Exfiltration (Data Theft)
+------------------------------
+
+Export capabilities
+
+Problem: An employee can click "Export to Excel" on any report and download all the underlying data to their personal computer, even data they shouldn't have access to.
+
+Fix: Turn off the "Export" button for sensitive reports in Power BI's settings. Only allow exports for non-sensitive data.
+
+Dataflows exposing staging data
+-------------------------------
+
+Problem: Power BI temporarily stores data in the cloud during processing. Too many people might have access to this temporary storage location.
+
+Fix: Limit who can access these temporary storage areas, just like you'd limit access to the final reports.
+
+Print and screenshot risks
+
+Problem: Even if you disable exports, people can still take screenshots or print reports to paper, walking away with sensitive information.
+
+Fix: Add watermarks with usernames on sensitive reports. Train employees on what they can and cannot share. Use labels that say "Confidential."
+
+Authentication and Authorization (Who Can Log In)
+-------------------------------------------------
+External guest user access
+
+Problem: You invited a contractor to view one report, but they accidentally got access to other reports with confidential company data.
+
+Fix: Review all external users regularly. Remove access when contractors leave. Set up rules that require extra verification for external users.
+
+Service principal overuse
+
+Problem: Automated systems (like scheduled reports) have "master keys" that grant them too much access - like giving them keys to every room in the building.
+
+Fix: Give automated systems only the specific access they need - like a key to just one room. Change these keys regularly.
+
+Weak authentication
+
+Problem: People can log into Power BI with just a password. If someone's password is "Password123," hackers can easily get in.
+
+Fix: Require two-factor authentication (like getting a code on your phone) in addition to passwords.
+
+API and Integration Risks (Connections to Other Systems)
+Power BI REST API exposure
+
+Problem: Programs can connect to Power BI automatically to get data. If the connection isn't secured properly, unauthorized programs could access your data.
+
+Fix: Monitor which programs are connecting to Power BI. Set up alerts if something unusual happens, like 1,000 requests in one minute.
+needed it department with "Power BI Admin" role or person that manages IT department with "Power BI Admin" role, or security team.
+
+Custom visuals from untrusted sources
+
+Problem: Someone downloads a fancy chart from the internet to use in Power BI. That chart is actually malicious software that steals data.
+
+Fix: Only allow pre-approved charts and visuals. Don't let people download random ones from the internet.
+
+Third-party app integrations
+
+Problem: You connect a productivity app to Power BI, and it asks for permission to "access all your Power BI data." Now that app company can see everything.
+Fix: Read permission requests carefully. Only grant access to specific reports, not everything. Review connected apps regularly.
+
+Governance and Compliance (Rules and Monitoring)
+Lack of audit logging
+
+Problem: Someone accessed confidential financial data, but you have no record of who or when, so you can't investigate.
+
+Fix: Turn on logging that tracks who accessed what and when. Set up automatic alerts for sensitive data access.
+
+
+No data classification
+
+Problem: All reports look the same - employees don't know which contain sensitive data and which are safe to share.
+Fix: Label reports as "Public," "Internal," or "Confidential." Apply rules that prevent confidential reports from being shared externally.
+
+Tenant setting misconfigurations
+
+Problem: Default Power BI settings allow anyone in the company to create workspaces, share externally, and export data freely.
+Fix: Review Power BI admin settings. Turn off risky features for everyone except specific teams that need them.
+
+Network and Infrastructure (Technical Setup)
+Public internet exposure
+
+Problem: Employees can access sensitive reports from anywhere - even from a coffee shop's public Wi-Fi, where hackers might intercept data.
+Fix: Require employees to use the company VPN when accessing sensitive reports from outside the office.
+
+Gateway vulnerabilities
+
+Problem: The gateway (the bridge between Power BI and your company databases) has outdated software with known security holes.
+Fix: Keep gateway software updated, just like you update Windows. Install it on secure company servers, not random computers.
+
+Azure networking misconfigurations
+
+Problem: Your Power BI data travels over the public internet where it could potentially be intercepted.
+Fix: For highly sensitive data, use private network connections that never touch the public internet.
+
+Premium-Specific Risks (Advanced Features)
+XMLA endpoint access
+
+Problem: Advanced users can bypass the normal Power BI interface and connect directly to your data using database tools, potentially seeing data they shouldn't.
+Fix: Only allow IT staff and approved analysts to use these direct connections. Monitor who's using them.
+
+Deployment pipelines exposing dev data
+
+Problem: Test data in your development environment looks real but shouldn't be seen by most people. Too many employees have access to development workspaces.
+Fix: Strictly separate who can access development, testing, and production environments. Use fake data in development when possible.
+
+Real-World Examples
+Example 1: The accidental data breach
+Sarah creates a customer list report. She clicks "Share" and selects "Everyone in my organization" because she thinks it means everyone in her department. Now 5,000 employees can see customer phone numbers and addresses.
+Example 2: The stolen credentials
+John saves his database password in the Power BI file. He emails the file to a colleague. The colleague's email gets hacked. Now the hacker has the database password and can access all company data directly.
+Example 3: The helpful contractor
+Your company hires a consultant and gives them access to a sales dashboard. They can export all the data to Excel, take it with them when the contract ends, and potentially share it with competitors.
+Simple Security Checklist
+✓ Always double-check who you're sharing reports with
+✓ Test that each user only sees their own data
+✓ Never type passwords directly in Power BI
+✓ Turn off "Export to Excel" for sensitive reports
+✓ Require two-factor authentication (codes sent to phones)
+✓ Label reports as "Public," "Internal," or "Confidential"
+✓ Review who has access to what every few months
+✓ Remove access when people leave the company or change roles
+✓ Only use approved charts and visuals, not random internet downloads
+✓ Check the logs regularly to see who's accessing sensitive data
+
