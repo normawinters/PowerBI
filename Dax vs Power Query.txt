@@ -1,7 +1,7 @@
 Written 12/9/2025
 Norma Winters
 
-DAX vs Power Query
+DAX vs Power Query (M code)
 
 DAX (Data Analysis Expressions)
 -------------------------------
@@ -14,7 +14,40 @@ DAX (Data Analysis Expressions)
 •	When: After data is in the model
 •	Example: Total Sales = SUM(Sales[Amount])
 
-Power Query (M Language)
+Power Query (M Code)  
+     M Code can be created in the wizzard like GUI,  Power Query Editor
+     *Note, sometimes using the advance feature to combine steps can speed up performance.
+     *Note, create m code functions can be a way standard way across multiple data sets.
+Example: This example determines 
+
+Create the function
+
+(TableToFilter as table, DateColumn as text, DaysBack as number) as table =>
+let
+    TodaysDate = DateTime.Date(DateTime.LocalNow()),
+    StartDate = Date.AddDays(TodaysDate, -DaysBack),
+    FilteredTable = Table.SelectRows(TableToFilter, each Record.Field(_, DateColumn) >= StartDate)
+in
+    FilteredTable
+
+Using the function fnFilterByDateRage, This filters any table to show only records from the last 30 days.
+
+= fnFilterByDateRange(SourceTable, "OrderDate", 30)
+
+
+A Second example: 
+
+Remove Special Characters from Text
+
+(inputText as text) as text =>
+let
+    // Remove special characters, keep only letters, numbers, and spaces
+    CleanText = Text.Select(inputText, {"A".."Z", "a".."z", "0".."9", " "})
+in
+    CleanText
+
+
+
 -----------------------------
 •	Purpose: Data transformation & preparation
 •	Use for: 
@@ -31,3 +64,4 @@ Key Difference
 Best Practice
 ----------------------------------
 Transform in Power Query → Calculate in DAX
+
