@@ -10,14 +10,43 @@ DAX (Data Analysis Expressions)
 	Calculated columns & measures
 	Aggregations (SUM, AVERAGE, COUNT)
 	Time intelligence (YTD, running totals)
-	Dynamic calculations with filters/slicers
+	Measure Dynamic calculations with filters/slicers
 •	When: After data is in the model
-•	Example: Total Sales = SUM(Sales[Amount])
+•	Example: Total Sales = SUM(Sales[Amount])  
+             Total Sales is a valid measure name
+             TotalSales is a valid variable name
+
+measure Example 1:
+Total Sales = SUM(Sales[Amount])
+
+Dax Example 2: 
+
+YoY Growth % = 
+VAR CurrentYear = SUM(Sales[Amount])
+VAR PreviousYear = CALCULATE(
+    SUM(Sales[Amount]),
+    SAMEPERIODLASTYEAR('Date'[Date])
+)
+RETURN
+DIVIDE(CurrentYear - PreviousYear, PreviousYear, 0)
+
+DAX Example 3:
+
+
+
+What is a measure
+
+Electronics Sales = 
+CALCULATE(
+    SUM(Sales[Amount]),
+    Sales[Category] = "Electronics"
+)
+
 
 Power Query (M Code)  
-     M Code can be created in the wizzard like GUI,  Power Query Editor
-     *Note, sometimes using the advance feature to combine steps can speed up performance.
-     *Note, create m code functions can be a way standard way across multiple data sets.
+     M Code can be created in the wizard-like GUI,  Power Query Editor
+     *Note: Sometimes using the advanced feature to combine steps can speed up performance.
+     *Note, creating m code functions can be a standard way across multiple data sets.
 Example: This example determines 
 
 Create the function
@@ -64,4 +93,5 @@ Key Difference
 Best Practice
 ----------------------------------
 Transform in Power Query → Calculate in DAX
+
 
